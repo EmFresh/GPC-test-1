@@ -41,6 +41,7 @@ int main()
 				jump=false;
 		}
 
+		//fajdlakfjl;fkdjsf;lja
 		EmConsole::toConsoleBuffer(playerAni.getSprite(), (int)playerPos.x, (int)playerPos.y);
 
 		EmConsole::drawConsole();
