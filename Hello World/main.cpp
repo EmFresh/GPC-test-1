@@ -14,17 +14,17 @@ int main()
 	while(true)
 	{
 		playerAni.setStop(false);
-		if(KeyInput::press(VK_LEFT) || KeyInput::press(VK_RIGHT))
-		{
-			if(KeyInput::press(VK_LEFT))
-				playerPos += Coord2D<float>(-.05, 0);
-			if(KeyInput::press(VK_RIGHT))
-				playerPos += Coord2D<float>(.05, 0);
-
-			playerAni.update();
-		}
-		else
-			playerAni.setStop(true);
+		//if(KeyInput::press(VK_LEFT) || KeyInput::press(VK_RIGHT))
+		//{
+		//	if(KeyInput::press(VK_LEFT))
+		//		playerPos += Coord2D<float>(-.05, 0);
+		//	if(KeyInput::press(VK_RIGHT))
+		//		playerPos += Coord2D<float>(.05, 0);
+		//
+		//	playerAni.update();
+		//}
+		//else
+		//	playerAni.setStop(true);
 
 		if(!jump)
 		if(KeyInput::press(VK_SPACE))
