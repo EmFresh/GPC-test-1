@@ -32,14 +32,14 @@ int main()
 		
 		
 
-		if(jump)
-		{
-			playerPos.y -= jumpFactor - (gravity * jumpTim++);
-			if(playerPos.y > 10)
-				playerPos.y = 10,
-				jumpTim = 0,
-				jump=false;
-		}
+		//if(jump)
+		//{
+		//	playerPos.y -= jumpFactor - (gravity * jumpTim++);
+		//	if(playerPos.y > 10)
+		//		playerPos.y = 10,
+		//		jumpTim = 0,
+		//		jump=false;
+		//}
 
 		EmConsole::toConsoleBuffer(playerAni.getSprite(), (int)playerPos.x, (int)playerPos.y);
 
