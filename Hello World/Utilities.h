@@ -36,9 +36,8 @@ static std::string tolower(char* dir)
 {
 	std::string tmp;
 	for(unsigned i = 0; i < strlen(dir); i++)
-	{
 		tmp += (char)tolower(*(dir + i));
-	}
+
 	return tmp;
 }
 
@@ -99,8 +98,8 @@ struct Coord2D
 		x = a_x, y = a_y;
 	}
 
-	template<class T2>
-	Coord2D(Coord2D<T2> other) { x = (T)other.x; y = (T)other.y; }
+	template<class I>
+	Coord2D(Coord2D<I> other) { x = (T)other.x; y = (T)other.y; }
 	T distance()
 	{
 		return sqrtf(x * x + y * y);
@@ -139,9 +138,10 @@ struct Coord2D
 		return {x - coord.x, y - coord.y};
 	}
 
-	friend Coord2D<T> operator*(T scaler, Coord2D<T> coord)
+	template<class I>
+	friend Coord2D<T> operator*(I scaler, Coord2D<T> coord)
 	{
-		return {scaler * coord.x, scaler * coord.y};
+		return {T(scaler * coord.x),T(scaler * coord.y)};
 	}
 
 	Coord2D<T> operator*(Coord2D<T> coord)
@@ -149,17 +149,20 @@ struct Coord2D
 		return {x * coord.x, y * coord.y};
 	}
 
-	Coord2D<T> operator*(T coord)
+	template<class I>
+	Coord2D<T> operator*(I coord)
 	{
-		return {x * coord, y * coord};
+		return {T(x * coord), T(y * coord)};
 	}
+
 	Coord2D operator/(Coord2D coord)
 	{
 		return {x / coord.x,y / coord.y};
 	}
-	Coord2D operator/(T coord)
+	template<class I>
+	Coord2D operator/(I coord)
 	{
-		return {x / coord,y / coord};
+		return {T(x / coord),T(y / coord)};
 	}
 	void operator-=(Coord2D coord)
 	{
@@ -175,7 +178,8 @@ struct Coord2D
 	{
 		x /= coord.x, y /= coord.y;
 	}
-	void operator/=(T coord)
+	template<class I>
+	void operator/=(I coord)
 	{
 		x /= coord, y /= coord;
 	}

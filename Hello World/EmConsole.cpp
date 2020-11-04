@@ -8,11 +8,16 @@
 #include <fcntl.h>
 
 using namespace std;
-bool EmConsole::m_buff = 0, EmConsole::m_resizable = 0, EmConsole::m_full = 0, EmConsole::m_init = 0;
-DWORD EmConsole::oldInputMode, EmConsole::newInputMode;
+/**Variables**/
 
-HANDLE EmConsole::m_con[2];
-INPUT_RECORD EmConsole::m_inputRecord[128];
+static DWORD oldInputMode, newInputMode;
+
+//static COORD _cursorPosition;
+static HANDLE m_con[2]/*, _input*/;
+static INPUT_RECORD m_inputRecord[128];
+
+//static UINT _conWidth, _conHeight;
+static bool m_buff, m_resizable, m_full, m_init;
 
 bool MouseInput::doubleClick;
 short MouseInput::vertWheel = 0, MouseInput::horiWheel = 0;
@@ -20,45 +25,6 @@ COORD MouseInput::position;
 std::map <short, bool> MouseInput::buttons;
 
 /***Constructers***/
-/*
-EmConsole::EmConsole(string& title)
-{
-	SetConsoleOutputCP(CP_WINUNICODE);
-	//int s=CP_INSTALLED;
-
-	SetConsoleTitleA(title.c_str());
-
-	_con[0] = GetStdHandle(STD_OUTPUT_HANDLE);
-	_con[1] = CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, CONSOLE_TEXTMODE_BUFFER, NULL);
-	setConsoleSize(0, 0);
-}
-
-EmConsole::EmConsole(const char * title)
-{
-	SetConsoleTitleA(title);
-	SetConsoleOutputCP(CP_WINUNICODE);
-
-	_con[0] = GetStdHandle(STD_OUTPUT_HANDLE);
-	_con[1] = CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, CONSOLE_TEXTMODE_BUFFER, NULL);
-
-	//_input = GetStdHandle(STD_INPUT_HANDLE);
-	GetConsoleMode(GetStdHandle(STD_INPUT_HANDLE), &oldInputMode);
-	SetConsoleMode(GetStdHandle(STD_INPUT_HANDLE), newInputMode = (oldInputMode|ENABLE_MOUSE_INPUT) & ~ENABLE_QUICK_EDIT_MODE);
-
-	//_setmode(_fileno(stdout), _O_U16TEXT); //sets the console to UTF16 mode.
-
-	setConsoleSize(0, 0);
-}
-
-EmConsole::EmConsole()
-
-{
-	SetConsoleTitleA("New Window");
-	_con[0] = GetStdHandle(STD_OUTPUT_HANDLE);
-	_con[1] = CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, CONSOLE_TEXTMODE_BUFFER, NULL);
-	setConsoleSize(0, 0);
-}
-*/
 
 void EmConsole::init()
 {
@@ -92,7 +58,8 @@ void EmConsole::setFullScreen(bool full)
 		//SetConsoleDisplayMode(_con[_buff], (full ? CONSOLE_FULLSCREEN_MODE : CONSOLE_WINDOWED_MODE), nullptr);
 		SetConsoleDisplayMode(m_con[0], (full ? CONSOLE_FULLSCREEN_MODE : CONSOLE_WINDOWED_MODE), nullptr);
 		SetConsoleDisplayMode(m_con[1], (full ? CONSOLE_FULLSCREEN_MODE : CONSOLE_WINDOWED_MODE), nullptr);
-	} else
+	}
+	else
 	{
 		//SetConsoleDisplayMode(_con[_buff], (full ? CONSOLE_FULLSCREEN_MODE : CONSOLE_WINDOWED_MODE), nullptr);
 		SetConsoleDisplayMode(m_con[0], (full ? CONSOLE_FULLSCREEN_MODE : CONSOLE_WINDOWED_MODE), nullptr);
@@ -108,6 +75,44 @@ bool EmConsole::getFullScreen()
 	return m_full;
 }
 
+/*
+summary:
+Creates a vector of vector string (2D vector) from a txt file
+
+Usage:
+To use this function effectively make sure your *.txt file has
+no empty lines in the beginning or end of it (so no extra
+vectors are not accidentaly created). Also, make sure ther is only one
+space seperating every sprite from each other (for the same reason as before).
+if done correctly you will basically have a sprite sheet that can be usefull for
+character movement or switching items or whatever.
+*/
+void EmConsole::textFileToVector(string file, vector<vector<wstring>>& str)
+{
+
+	wfstream ascii(file, ios::in);
+
+	try//if(ascii.is_open())
+	{
+		wstring line;
+
+		str.push_back(vector<wstring>());
+
+		for(int a = 0; getline(ascii, line); a++)
+		{
+			if(line.size() == 0)
+			{
+				str.push_back(vector<wstring>());
+				continue;
+			}
+			else if(line.size() > 0)
+				str[a].push_back(line);
+			//OutputDebugString((line + "\n").c_str());
+		}
+	} catch(...) {}
+
+	ascii.close();
+}
 
 vector<vector<wstring>> EmConsole::textFileToVector(string file)
 {
@@ -116,7 +121,6 @@ vector<vector<wstring>> EmConsole::textFileToVector(string file)
 	return str;
 }
 
-//Sets title
 void EmConsole::setTitle(string title)
 {
 	SetConsoleTitleA(title.c_str());
@@ -245,45 +249,6 @@ void EmConsole::consoleCursorPosition(int x, int y)
 	//SetConsoleCursorPosition(con[1], cursorPosition);
 }
 
-/*
-summary:
-Creates a vector of vector string (2D vector) from a txt file
-
-Usage:
-To use this function effectively make sure your *.txt file has
-no empty lines in the beginning or end of it (so no extra
-vectors are not accidentaly created). Also, make sure ther is only one
-space seperating every sprite from each other (for the same reason as before).
-if done correctly you will basically have a sprite sheet that can be usefull for
-character movement or switching items or whatever.
-*/
-void EmConsole::textFileToVector(string file, vector<vector<wstring>>& str)
-{
-
-	wfstream ascii(file, wfstream::in);
-
-	try//if(ascii.is_open())
-	{
-		wstring line;
-
-		str.push_back(vector<wstring>());
-
-		for(int a = 0; getline(ascii, line); a++)
-		{
-			if(line.size() == 0)
-			{
-				str.push_back(vector<wstring>());
-				continue;
-			} else if(line.size() > 0)
-				str[a].push_back(line);
-			//OutputDebugString((line + "\n").c_str());
-		}
-	} catch(...)
-	{
-	}
-
-	ascii.close();
-}
 
 /*special stuff for tetris (don't even try to understand)*/
 vector<int> EmConsole::readConsoleLineAtributes(int x, int y, float width)
@@ -830,6 +795,16 @@ void EmConsole::toConsoleBuffer(Sprite& str, int x, int y)
 	toConsoleBuffer(str, x, y, str.getColour());
 }
 
+void EmConsole::toConsoleBuffer(Sprite& str)
+{
+	toConsoleBuffer(str, str.getX(), str.getY(), str.getColour());
+}
+
+void EmConsole::toConsoleBuffer(Sprite& str, int colour)
+{
+	toConsoleBuffer(str, str.getX(), str.getY(), colour);
+}
+
 /*
 toConsoleBuffer(const wchar_t* str, float poX, float poY, int x, int y, int colour);
 * str    - string to be drawn to buffer
@@ -1088,7 +1063,8 @@ void EmConsole::drawConsole(bool clear)
 		m_con[m_buff] = m_con[!m_buff];
 		m_con[!m_buff] = temp;
 		m_buff = !m_buff;
-	} else
+	}
+	else
 	{
 		SetConsoleActiveScreenBuffer(m_con[m_buff]);
 		m_buff = !m_buff;
@@ -1106,12 +1082,12 @@ void EmConsole::clearConsole()
 	FillConsoleOutputAttribute(m_con[m_buff], NULL, L.X * L.Y, COORD{0,0}, &_cCharsWritten);
 }
 
-void Sprite::toBuffer(ushort x, ushort y)
+void Sprite::toBuffer(short x, short y)
 {
 	EmConsole::toConsoleBuffer(*this, x, y, m_colour);
 }
 
-void Sprite::toBufferNS(ushort x, ushort y)
+void Sprite::toBufferNS(short x, short y)
 {
 	EmConsole::toConsoleBufferNS(*this, x, y, m_colour);
 }
